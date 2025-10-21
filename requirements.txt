@@ -1,0 +1,7 @@
+# Python standard library modules used:
+# - tkinter (comes with Python)
+# - datetime (comes with Python)
+# - subprocess (comes with Python)
+
+# No external dependencies required for basic functionality
+# All modules used are part of Python's standard library
