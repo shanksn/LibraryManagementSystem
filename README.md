@@ -1,6 +1,6 @@
 # Library Management System 📚
 **Class XII Computer Science Project**
-**Student:** Jhanvi Shankar | **Roll No:** 120214
+**Student:** Jhanvi Shankar | **Roll No:** ASLSKLDK
 
 A complete Python-based Library Management System with MySQL database integration, featuring separate interfaces for administrators and library members with comprehensive book tracking and transaction logging.
 
