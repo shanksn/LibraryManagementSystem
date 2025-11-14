@@ -58,19 +58,19 @@ canvas.pack()
 canvas.create_image(0, 0, image=bg_photo, anchor=tk.NW)
 
 # Create white login box in center
-frame = tk.Frame(canvas, bg="white")
-canvas.create_window(400, 300, window=frame, width=350, height=250)
+frame = tk.Frame(canvas, bg="white", relief=tk.RAISED, bd=2)
+canvas.create_window(400, 300, window=frame, width=350, height=280)
 
 # Add title
-tk.Label(frame, text="Library Management System", font=("Arial", 16, "bold"), bg="white").pack(pady=15)
+tk.Label(frame, text="Library Management System", font=("Arial", 16, "bold"), bg="white", fg="#2196F3").pack(pady=15)
 
 # Username field
-tk.Label(frame, text="Username", font=("Arial", 10), bg="white").pack(pady=5)
+tk.Label(frame, text="Username", font=("Arial", 11, "bold"), bg="white", fg="#333").pack(pady=5)
 username_entry = tk.Entry(frame, font=("Arial", 11), width=25)
 username_entry.pack(pady=5)
 
 # Password field
-tk.Label(frame, text="Password", font=("Arial", 10), bg="white").pack(pady=5)
+tk.Label(frame, text="Password", font=("Arial", 11, "bold"), bg="white", fg="#333").pack(pady=5)
 password_entry = tk.Entry(frame, font=("Arial", 11), width=25, show="*")
 password_entry.pack(pady=5)
 

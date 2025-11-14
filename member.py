@@ -34,7 +34,7 @@ def search_books():
     conn = get_conn()
     cur = conn.cursor()
     search_term = '%' + search_entry.get() + '%'
-    cur.execute("SELECT book_id, title, author, year FROM books WHERE (title LIKE %s OR author LIKE %s) AND book_status='Returned'",
+    cur.execute("SELECT book_id, title, author, year FROM books WHERE (title LIKE %s OR author LIKE %s) AND book_status IN ('Returned', 'New') AND record_status='Active'",
                 (search_term, search_term))
     for row in cur.fetchall():
         search_tree.insert('', tk.END, values=row)
@@ -87,10 +87,12 @@ search_entry = tk.Entry(search_bar, font=("Arial", 11), width=35)
 search_entry.pack(side=tk.LEFT, padx=5)
 tk.Button(search_bar, text="Search", command=search_books).pack(side=tk.LEFT, padx=5)
 
-search_tree = ttk.Treeview(search_frame, columns=cols, show='headings', height=8)
-for col in cols:
+search_cols = ('ID', 'Title', 'Author', 'Year')
+search_tree = ttk.Treeview(search_frame, columns=search_cols, show='headings', height=8)
+search_widths = [60, 250, 200, 80]
+for i, col in enumerate(search_cols):
     search_tree.heading(col, text=col)
-    search_tree.column(col, width=180)
+    search_tree.column(col, width=search_widths[i])
 search_tree.pack(pady=10, padx=10, fill=tk.BOTH, expand=True)
 
 tk.Label(search_frame, text="Contact admin to issue books", font=("Arial", 10), bg="white", fg="#666").pack(pady=10)
