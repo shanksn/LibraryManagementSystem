@@ -1,7 +1,10 @@
-# Python standard library modules used:
-# - tkinter (comes with Python)
-# - datetime (comes with Python)
-# - subprocess (comes with Python)
+# Library Management System - Python Dependencies
+# Class XII Computer Science Project
 
-# No external dependencies required for basic functionality
-# All modules used are part of Python's standard library
+# Required external package
+mysql-connector-python>=8.0.0
+
+# Python standard library modules (already included with Python):
+# - tkinter (GUI framework)
+# - datetime (date/time handling)
+# No additional installation needed for standard library modules
