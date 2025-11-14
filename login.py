@@ -7,8 +7,8 @@ import sys
 from PIL import Image, ImageTk
 from config import db_config  # Import database settings from config.py
 
-# Login function
-def login():
+# Login function (event parameter optional for Enter key binding)
+def login(event=None):
     # Get username and password from entry fields
     username = username_entry.get().strip()
     password = password_entry.get().strip()
@@ -78,7 +78,7 @@ password_entry.pack(pady=5)
 tk.Button(frame, text="Login", font=("Arial", 11, "bold"), width=15, command=login).pack(pady=15)
 
 # Allow Enter key to login
-password_entry.bind('<Return>', lambda e: login())
+password_entry.bind('<Return>', login)
 
 # Start the application
 root.mainloop()
