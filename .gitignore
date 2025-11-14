@@ -23,6 +23,9 @@ ENV/
 *.db
 *.sqlite
 
+# Generated reports
+weekly_report_*.pdf
+
 # Backup files
 backup_old_files/
 setup_database.py

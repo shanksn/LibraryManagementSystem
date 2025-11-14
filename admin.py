@@ -19,6 +19,40 @@ def add_user():
 def add_book():
     subprocess.Popen([sys.executable, 'add_book.py'])
 
+def weekly_report():
+    # Show weekly report in a new window
+    win = tk.Toplevel(root)
+    win.title("Weekly Report - Last 7 Days")
+    win.geometry("800x500")
+
+    tk.Label(win, text="Weekly Library Report", font=("Arial", 16, "bold")).pack(pady=10)
+
+    conn = get_conn()
+    cur = conn.cursor()
+    week_ago = datetime.now() - timedelta(days=7)
+
+    # Get transactions for last 7 days
+    cur.execute("SELECT action, book_id, member_id, transaction_date, notes FROM transactions WHERE transaction_date >= %s ORDER BY transaction_date DESC", (week_ago,))
+    transactions = cur.fetchall()
+
+    # Create treeview
+    cols = ('Date', 'Action', 'Book', 'Member ID', 'Notes')
+    tree = ttk.Treeview(win, columns=cols, show='headings', height=18)
+    for col in cols:
+        tree.heading(col, text=col)
+    tree.column('Date', width=100)
+    tree.column('Action', width=80)
+    tree.column('Book', width=80)
+    tree.column('Member ID', width=80)
+    tree.column('Notes', width=400)
+    tree.pack(pady=10, padx=10, fill=tk.BOTH, expand=True)
+
+    for trans in transactions:
+        date_str = trans[3].strftime('%d/%m/%Y') if trans[3] else 'N/A'
+        tree.insert('', tk.END, values=(date_str, trans[0], trans[1], trans[2] or 'N/A', trans[4] or ''))
+
+    conn.close()
+
 def search_catalog():
     win = tk.Toplevel(root)
     win.title("Search Catalog")
@@ -263,8 +297,12 @@ tk.Button(header, text="Logout", font=("Arial", 10), command=root.destroy).place
 content = tk.Frame(root, bg="#f5f5f5")
 content.pack(fill=tk.BOTH, expand=True, padx=40, pady=40)
 
-buttons = [("Add Member", add_user), ("Add Book", add_book), ("Search Catalog", search_catalog)]
+# Center the button grid
+button_container = tk.Frame(content, bg="#f5f5f5")
+button_container.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+
+buttons = [("Add Member", add_user), ("Add Book", add_book), ("Search Catalog", search_catalog), ("Weekly Reports", weekly_report)]
 for i, (text, cmd) in enumerate(buttons):
-    tk.Button(content, text=text, font=("Arial", 12, "bold"), width=20, height=2, command=cmd).grid(row=i//2, column=i%2, padx=20, pady=20)
+    tk.Button(button_container, text=text, font=("Arial", 12, "bold"), width=20, height=2, command=cmd).grid(row=i//2, column=i%2, padx=20, pady=20)
 
 root.mainloop()
