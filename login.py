@@ -10,7 +10,7 @@ from PIL import Image, ImageTk
 db_config = {
     'host': 'localhost',
     'user': 'root',
-    'password': 'invasion',
+    'password': 'your_password',  # Replace with your MySQL password
     'database': 'library_management_system'
 }
 

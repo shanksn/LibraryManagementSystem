@@ -4,7 +4,7 @@ from tkinter import messagebox
 import mysql.connector
 
 # Database connection settings
-db_config = {'host': 'localhost', 'user': 'root', 'password': 'invasion', 'database': 'library_management_system'}
+db_config = {'host': 'localhost', 'user': 'root', 'password': 'your_password', 'database': 'library_management_system'}  # Replace with your MySQL password
 
 # Save new member to database
 def save():

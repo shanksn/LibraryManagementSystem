@@ -5,7 +5,7 @@ import mysql.connector
 import sys
 from datetime import timedelta
 
-db_config = {'host': 'localhost', 'user': 'root', 'password': 'invasion', 'database': 'library_management_system'}
+db_config = {'host': 'localhost', 'user': 'root', 'password': 'your_password', 'database': 'library_management_system'}  # Replace with your MySQL password
 user_id = int(sys.argv[1]) if len(sys.argv) > 1 else 1
 
 def get_conn():
