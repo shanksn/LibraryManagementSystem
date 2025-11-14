@@ -46,7 +46,27 @@ A complete Python-based Library Management System with MySQL database integratio
 pip install -r requirements.txt
 ```
 
-### 2. Setup MySQL Database
+### 2. Configure Database Connection
+**IMPORTANT:** Set up your database credentials first!
+
+```bash
+# Copy the template file
+cp config_template.py config.py
+
+# Edit config.py and replace 'your_password' with your MySQL password
+```
+
+Or manually create `config.py`:
+```python
+db_config = {
+    'host': 'localhost',
+    'user': 'root',
+    'password': 'your_mysql_password',  # Replace this
+    'database': 'library_management_system'
+}
+```
+
+### 3. Setup MySQL Database
 ```bash
 python3 setup_database_final.py
 ```
@@ -56,7 +76,7 @@ Enter your MySQL credentials when prompted. This creates:
 - **125+ Indian books** across 18 genres
 - Sample issued books for testing
 
-### 3. Run the Application
+### 4. Run the Application
 ```bash
 python3 login.py
 ```
@@ -203,17 +223,30 @@ All books include authentic ISBN numbers and publication years.
 
 ## 🛠️ Configuration
 
-### Database Connection
-Update in all `.py` files if needed:
+### Database Connection (Using config.py)
+This project uses a **separate configuration file** approach (CBSE syllabus compliant):
 
+**File: `config.py`** (not tracked in Git)
 ```python
 db_config = {
     'host': 'localhost',
     'user': 'root',
-    'password': 'your_password',  # Change this
+    'password': 'your_password',  # Your actual password here
     'database': 'library_management_system'
 }
 ```
+
+**Benefits:**
+- ✅ Single location for database credentials
+- ✅ Easy to update password once
+- ✅ Secure (config.py is ignored by Git)
+- ✅ CBSE recommended practice (modular programming)
+- ✅ All files import from: `from config import db_config`
+
+**For GitHub users:**
+1. Copy `config_template.py` to `config.py`
+2. Update your password in `config.py`
+3. `config.py` is automatically ignored by Git
 
 ### Window Size
 All screens are set to **800x600** for consistency.
@@ -222,8 +255,13 @@ All screens are set to **800x600** for consistency.
 
 ## 🐛 Troubleshooting
 
+**Error: "No module named 'config'"**
+- You need to create `config.py` from `config_template.py`
+- Run: `cp config_template.py config.py`
+- Then edit `config.py` with your MySQL password
+
 **Error: "Access denied for user 'root'"**
-- Update the password in `db_config` in all Python files
+- Update the password in `config.py`
 
 **Error: "No module named 'mysql.connector'"**
 ```bash

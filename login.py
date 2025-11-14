@@ -5,14 +5,7 @@ import mysql.connector
 import subprocess
 import sys
 from PIL import Image, ImageTk
-
-# Database connection settings
-db_config = {
-    'host': 'localhost',
-    'user': 'root',
-    'password': 'your_password',  # Replace with your MySQL password
-    'database': 'library_management_system'
-}
+from config import db_config  # Import database settings from config.py
 
 # Login function
 def login():

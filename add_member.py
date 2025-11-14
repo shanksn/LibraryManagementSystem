@@ -2,9 +2,7 @@
 import tkinter as tk
 from tkinter import messagebox
 import mysql.connector
-
-# Database connection settings
-db_config = {'host': 'localhost', 'user': 'root', 'password': 'your_password', 'database': 'library_management_system'}  # Replace with your MySQL password
+from config import db_config  # Import database settings from config.py
 
 # Save new member to database
 def save():

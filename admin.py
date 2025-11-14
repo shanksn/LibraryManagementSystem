@@ -5,8 +5,7 @@ import mysql.connector
 import subprocess
 import sys
 from datetime import datetime, timedelta
-
-db_config = {'host': 'localhost', 'user': 'root', 'password': 'your_password', 'database': 'library_management_system'}  # Replace with your MySQL password
+from config import db_config  # Import database settings from config.py
 
 # Get admin user_id from command line
 admin_user_id = int(sys.argv[1]) if len(sys.argv) > 1 else None

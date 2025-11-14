@@ -4,8 +4,8 @@ from tkinter import ttk
 import mysql.connector
 import sys
 from datetime import timedelta
+from config import db_config  # Import database settings from config.py
 
-db_config = {'host': 'localhost', 'user': 'root', 'password': 'your_password', 'database': 'library_management_system'}  # Replace with your MySQL password
 user_id = int(sys.argv[1]) if len(sys.argv) > 1 else 1
 
 def get_conn():
