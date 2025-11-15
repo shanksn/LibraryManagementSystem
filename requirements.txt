@@ -1,9 +1,12 @@
 # Library Management System - Python Dependencies
 # Class XII Computer Science Project
 
-# Required external packages
+# Required for running the application
 mysql-connector-python>=8.0.0
 Pillow>=9.0.0
+
+# Required for building Windows executable (optional)
+pyinstaller>=5.0.0
 
 # Python standard library modules (already included with Python):
 # - tkinter (GUI framework)
