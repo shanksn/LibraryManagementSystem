@@ -72,6 +72,9 @@ def search_catalog():
         tree.column(col, width=widths[i])
     tree.pack(pady=10, fill=tk.BOTH, expand=True)
 
+    # Track popup window to prevent duplicates
+    popup_window = None
+
     def search():
         for row in tree.get_children(): tree.delete(row)
         conn = get_conn()
@@ -104,6 +107,12 @@ def search_catalog():
         conn.close()
 
     def show_copies(_):
+        nonlocal popup_window
+
+        # Prevent duplicate windows - close existing popup if open
+        if popup_window and popup_window.winfo_exists():
+            popup_window.destroy()
+
         sel = tree.selection()
         if not sel: return
         item_values = tree.item(sel[0])['values']
@@ -113,6 +122,7 @@ def search_catalog():
         popup = tk.Toplevel(win)
         popup.title(f"{title} - All Copies")
         popup.geometry("900x500")
+        popup_window = popup  # Track this window
 
         tk.Label(popup, text=f"{title} by {author}", font=("Arial", 14, "bold"), pady=10).pack()
 
