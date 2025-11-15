@@ -126,11 +126,6 @@ def search_catalog():
 
         tk.Label(popup, text=f"{title} by {author}", font=("Arial", 14, "bold"), pady=10).pack()
 
-        conn = get_conn()
-        cur = conn.cursor()
-        cur.execute("SELECT book_id, copy_number, book_status, issued_to_member_id, issue_date FROM books WHERE title=%s AND author=%s", (title, author))
-        copies = cur.fetchall()
-
         copy_cols = ('Book ID', 'Copy#', 'Status', 'Issued To', 'Issue Date', 'Due Date')
         copy_tree = ttk.Treeview(popup, columns=copy_cols, show='headings', height=12)
         copy_widths = [80, 70, 90, 200, 120, 120]
@@ -139,21 +134,35 @@ def search_catalog():
             copy_tree.column(col, width=copy_widths[i])
         copy_tree.pack(pady=10, padx=10, fill=tk.BOTH, expand=True)
 
-        for copy in copies:
-            issued_to = 'Available'
-            issue_date_str = 'N/A'
-            due_date_str = 'N/A'
-            if copy[3]:
-                cur.execute("SELECT name, username FROM members m JOIN users u ON m.user_id = u.user_id WHERE member_id = %s", (copy[3],))
-                member = cur.fetchone()
-                if member:
-                    issued_to = f"{member[0]} ({member[1]})"
-            if copy[4]:
-                issue_date_str = copy[4].strftime('%d/%m/%Y')
-                due_date = copy[4] + timedelta(days=15)
-                due_date_str = due_date.strftime('%d/%m/%Y')
-            copy_tree.insert('', tk.END, values=(copy[0], copy[1], copy[2], issued_to, issue_date_str, due_date_str))
-        conn.close()
+        def refresh_copies():
+            # Clear existing rows
+            for row in copy_tree.get_children():
+                copy_tree.delete(row)
+
+            # Reload copy data from database
+            conn = get_conn()
+            cur = conn.cursor()
+            cur.execute("SELECT book_id, copy_number, book_status, issued_to_member_id, issue_date FROM books WHERE title=%s AND author=%s", (title, author))
+            copies = cur.fetchall()
+
+            for copy in copies:
+                issued_to = 'Available'
+                issue_date_str = 'N/A'
+                due_date_str = 'N/A'
+                if copy[3]:
+                    cur.execute("SELECT name, username FROM members m JOIN users u ON m.user_id = u.user_id WHERE member_id = %s", (copy[3],))
+                    member = cur.fetchone()
+                    if member:
+                        issued_to = f"{member[0]} ({member[1]})"
+                if copy[4]:
+                    issue_date_str = copy[4].strftime('%d/%m/%Y')
+                    due_date = copy[4] + timedelta(days=15)
+                    due_date_str = due_date.strftime('%d/%m/%Y')
+                copy_tree.insert('', tk.END, values=(copy[0], copy[1], copy[2], issued_to, issue_date_str, due_date_str))
+            conn.close()
+
+        # Load initial data
+        refresh_copies()
 
         def return_selected():
             sel_copy = copy_tree.selection()
@@ -174,8 +183,8 @@ def search_catalog():
             conn.commit()
             conn.close()
             messagebox.showinfo("Success", "Book returned!")
-            popup.destroy()
-            search()
+            refresh_copies()  # Refresh the list instead of closing popup
+            search()  # Update main catalog
 
         button_frame = tk.Frame(popup)
         button_frame.pack(side=tk.BOTTOM, pady=15)
