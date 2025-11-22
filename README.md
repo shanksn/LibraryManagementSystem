@@ -15,8 +15,8 @@ A complete Python-based Library Management System with MySQL database integratio
 - Account status verification
 
 ### 👨‍💼 Admin Features
-- **Add Members**: Create new library member accounts with full details
-- **Add Books**: Add books with ISBN, multiple copies support
+- **Add Members**: Create new library member accounts with full details (prevents duplicate usernames)
+- **Add Books**: Add books with ISBN, multiple copies support (1-5 copies, prevents duplicate titles by same author)
 - **Search Catalog**:
   - View all books with filtering (Active/Deleted/All)
   - See total copies and available copies
@@ -208,6 +208,12 @@ All books include authentic ISBN numbers and publication years.
 - Same book title can have multiple copies
 - Each copy tracked separately with copy_number
 - Available count shows copies with status "New" or "Returned"
+- Maximum 5 copies per book can be added at once
+- Minimum 1 copy required
+
+✅ **Duplicate Prevention**:
+- Members: Username must be unique across all users
+- Books: Same title by same author cannot be added twice
 
 ✅ **Date Format**: dd/mm/yyyy (Indian standard)
 
@@ -287,7 +293,10 @@ pip install Pillow
 
 1. **Login** with admin credentials
 2. **Add Members**: Click "Add Member" → Fill form → Save
-3. **Add Books**: Click "Add Book" → Enter details → Specify copies → Save
+   - Username must be unique (system checks for duplicates)
+3. **Add Books**: Click "Add Book" → Enter details → Specify copies (1-5) → Save
+   - System prevents duplicate books (same title + author)
+   - Number of copies must be between 1 and 5
 4. **Search Books**:
    - Use search bar to find books
    - Use filter dropdown to view Active/Deleted/All books

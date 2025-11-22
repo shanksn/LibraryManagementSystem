@@ -24,6 +24,13 @@ def save():
         conn = mysql.connector.connect(**db_config)
         cur = conn.cursor()
 
+        # Check if username already exists
+        cur.execute("SELECT username FROM users WHERE username = %s", (username,))
+        if cur.fetchone():
+            messagebox.showerror("Error", f"Username '{username}' already exists!\nPlease choose a different username.")
+            conn.close()
+            return
+
         # Insert into users table
         cur.execute("INSERT INTO users (username, password, full_name, user_type, status) VALUES (%s, %s, %s, 'member', 'active')",
                    (username, password, name))

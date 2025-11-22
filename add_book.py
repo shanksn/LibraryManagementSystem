@@ -25,6 +25,9 @@ def save():
         if copies < 1:
             messagebox.showerror("Error", "Number of copies must be at least 1")
             return
+        if copies > 5:
+            messagebox.showerror("Error", "Number of copies cannot be more than 5")
+            return
     except ValueError:
         messagebox.showerror("Error", "Year and copies must be valid numbers")
         return
@@ -33,6 +36,14 @@ def save():
         # Connect to database
         conn = mysql.connector.connect(**db_config)
         cur = conn.cursor()
+
+        # Check if book with same title and author already exists
+        cur.execute("SELECT title, author FROM books WHERE title = %s AND author = %s LIMIT 1", (title, author))
+        existing_book = cur.fetchone()
+        if existing_book:
+            messagebox.showerror("Error", f"Book '{title}' by {author} already exists in the library!\nUse a different title or check existing copies.")
+            conn.close()
+            return
 
         # Insert each copy of the book
         for i in range(1, copies + 1):
