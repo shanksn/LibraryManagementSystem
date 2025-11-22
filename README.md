@@ -394,7 +394,7 @@ For issues or questions:
 ---
 
 **Version**: 3.0
-**Last Updated**: November 2024
+**Last Updated**: November 2025
 
 ---
 
