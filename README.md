@@ -22,7 +22,7 @@ A complete Python-based Library Management System with MySQL database integratio
   - See total copies and available copies
   - Track borrowers with issue and due dates
   - Double-click to view all copies of a book
-- **Issue Books**: Assign books to members with automatic due date calculation (15 days)
+- **Issue Books**: Assign books to members with automatic due date calculation (15 days) - Max 3 books per member
 - **Return Books**: Process book returns from the detailed copy view
 - **Delete Books**: Soft delete books (can be restored manually)
 - **Transaction Audit Trail**: All actions tracked with admin user ID
@@ -107,13 +107,19 @@ library_app/
 ├── login.py                    # Login screen with authentication
 ├── admin.py                    # Admin dashboard
 ├── member.py                   # Member dashboard
-├── add_member.py              # Add new member form
-├── add_book.py                # Add new book form
-├── setup_database_final.py    # Database setup with 125+ books
-├── library.jpeg               # Background image for login
-├── requirements.txt           # Python dependencies
-├── README.md                  # This file
-└── INSTRUCTIONS.md            # Additional setup instructions
+├── add_member.py               # Add new member form
+├── add_book.py                 # Add new book form
+├── setup_database_final.py     # Database setup with 125+ books
+├── config_template.py          # Database config template
+├── library.jpeg                # Background image for login
+├── requirements.txt            # Python dependencies
+├── README.md                   # This file
+└── docs/                       # Documentation and utilities
+    ├── USER_MANUAL.md          # Comprehensive user manual
+    ├── BUILD_INSTRUCTIONS.md   # Build instructions
+    ├── INSTRUCTIONS.md         # Setup instructions
+    ├── build_windows_exe.py    # Windows executable builder
+    └── ... (other documentation)
 ```
 
 ---
@@ -214,6 +220,8 @@ All books include authentic ISBN numbers and publication years.
 ✅ **Duplicate Prevention**:
 - Members: Username must be unique across all users
 - Books: Same title by same author cannot be added twice
+
+✅ **Borrowing Limit**: Members can borrow maximum 3 books at a time
 
 ✅ **Date Format**: dd/mm/yyyy (Indian standard)
 

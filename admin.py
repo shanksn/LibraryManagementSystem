@@ -225,6 +225,14 @@ def search_catalog():
                 cur.execute("SELECT member_id FROM members WHERE user_id = %s", (user[0],))
                 member = cur.fetchone()
                 if member:
+                    # Check if member already has 3 books (borrowing limit)
+                    cur.execute("SELECT COUNT(*) FROM books WHERE issued_to_member_id = %s AND book_status = 'Issued'", (member[0],))
+                    current_books = cur.fetchone()[0]
+                    if current_books >= 3:
+                        conn.close()
+                        messagebox.showerror("Error", f"Member '{member_username}' already has 3 books issued.\nMaximum borrowing limit reached.")
+                        return
+
                     cur.execute("SELECT book_id FROM books WHERE title=%s AND author=%s AND book_status IN ('Returned', 'New') AND record_status='Active' LIMIT 1", (title, author))
                     available_book = cur.fetchone()
                     if available_book:
