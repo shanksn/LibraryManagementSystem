@@ -262,10 +262,20 @@ def search_catalog():
         title = item_values[0].replace(" [Deleted]", "")
         author = item_values[1]
 
+        conn = get_conn()
+        cur = conn.cursor()
+
+        # Check if any copy of this book is currently issued
+        cur.execute("SELECT COUNT(*) FROM books WHERE title=%s AND author=%s AND book_status='Issued'", (title, author))
+        issued_count = cur.fetchone()[0]
+
+        if issued_count > 0:
+            conn.close()
+            messagebox.showerror("Error", f"Cannot delete '{title}' by {author}.\n\n{issued_count} cop{'y is' if issued_count == 1 else 'ies are'} currently issued to members.\nPlease return all copies before deleting.")
+            return
+
         confirm = messagebox.askyesno("Delete Book", f"Delete '{title}' by {author}?\n\nAll copies will be marked deleted.")
         if confirm:
-            conn = get_conn()
-            cur = conn.cursor()
             cur.execute("UPDATE books SET record_status='Deleted' WHERE title=%s AND author=%s", (title, author))
             cur.execute("SELECT book_id FROM books WHERE title=%s AND author=%s LIMIT 1", (title, author))
             book = cur.fetchone()

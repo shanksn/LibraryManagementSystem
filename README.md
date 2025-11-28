@@ -227,7 +227,10 @@ All books include authentic ISBN numbers and publication years.
 
 ✅ **Due Date**: Automatically calculated as 15 days from issue date
 
-✅ **Soft Delete**: Deleted books remain in database with record_status="Deleted"
+✅ **Soft Delete**:
+- Deleted books remain in database with record_status="Deleted"
+- Cannot delete books that are currently issued to members
+- Must return all copies before deletion
 
 ✅ **Transaction Logging**: Every book action logged with admin user ID for accountability
 
