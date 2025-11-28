@@ -27,28 +27,42 @@ def login(event=None):
     result = cursor.fetchone()
     conn.close()
 
-    # If user found and account is active
-    if result and result[3] == 'active':
-        user_id = result[0]
-        user_name = result[1]
-        user_type = result[2]
+    # Check login result
+    if result:
+        # User exists - check if account is active
+        if result[3] == 'active':
+            # Account is active - proceed with login
+            user_id = result[0]
+            user_name = result[1]
+            user_type = result[2]
 
-        messagebox.showinfo("Success", f"Welcome, {user_name}!")
-        root.destroy()
+            messagebox.showinfo("Success", f"Welcome, {user_name}!")
+            root.destroy()
 
-        # Open admin or member screen based on user type
-        if user_type == 'admin':
-            subprocess.Popen([sys.executable, 'admin.py', str(user_id)])
+            # Open admin or member screen based on user type
+            if user_type == 'admin':
+                subprocess.Popen([sys.executable, 'admin.py', str(user_id)])
+            else:
+                subprocess.Popen([sys.executable, 'member.py', str(user_id)])
         else:
-            subprocess.Popen([sys.executable, 'member.py', str(user_id)])
+            # Account exists but is inactive
+            messagebox.showerror("Error", "Account is inactive. Please contact administrator.")
     else:
-        messagebox.showerror("Error", "Invalid credentials")
+        # Invalid username or password
+        messagebox.showerror("Error", "Invalid username or password")
 
 # Create main window
 root = tk.Tk()
 root.title("Library Management System")
 root.geometry("800x600")
 root.resizable(False, False)
+
+# Set window icon (if icon file exists)
+try:
+    icon_img = tk.PhotoImage(file='library_icon.png')
+    root.iconphoto(True, icon_img)
+except:
+    pass  # If icon file doesn't exist, use default
 
 # Load and display background image
 bg_image = Image.open("library.jpeg").resize((800, 600))
