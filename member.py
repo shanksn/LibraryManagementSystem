@@ -35,24 +35,20 @@ def search_books():
     cur = conn.cursor()
     search_term = '%' + search_entry.get() + '%'
 
-    # Get distinct books that have at least one active copy
-    cur.execute("SELECT DISTINCT title, author, year FROM books WHERE (title LIKE %s OR author LIKE %s) AND record_status='Active'",
+    # Get distinct books that have at least one available copy
+    cur.execute("SELECT DISTINCT title, author, year FROM books WHERE (title LIKE %s OR author LIKE %s) AND book_status IN ('Returned', 'New') AND record_status='Active'",
                 (search_term, search_term))
     books = cur.fetchall()
 
     for book in books:
         title, author, year = book[0], book[1], book[2]
-        # Count total active copies for this book
-        cur.execute("SELECT COUNT(*) FROM books WHERE title=%s AND author=%s AND record_status='Active'",
+        # Count available copies for this book
+        cur.execute("SELECT COUNT(*) FROM books WHERE title=%s AND author=%s AND book_status IN ('Returned', 'New') AND record_status='Active'",
                     (title, author))
-        total = cur.fetchone()[0]
+        available = cur.fetchone()[0]
 
-        # Only show books that have at least one active copy
-        if total > 0:
-            # Count available copies for this book
-            cur.execute("SELECT COUNT(*) FROM books WHERE title=%s AND author=%s AND book_status IN ('Returned', 'New') AND record_status='Active'",
-                        (title, author))
-            available = cur.fetchone()[0]
+        # Only show if there are available copies
+        if available > 0:
             search_tree.insert('', tk.END, values=(title, author, year, available))
 
     conn.close()
