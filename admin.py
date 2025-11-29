@@ -11,19 +11,39 @@ from config import db_config
 
 admin_user_id = int(sys.argv[1]) if len(sys.argv) > 1 else None
 
+# Track open windows to prevent duplicates
+open_windows = {
+    'add_member': None,
+    'add_book': None,
+    'search_catalog': None,
+    'weekly_report': None
+}
+
 def get_conn():
     return mysql.connector.connect(**db_config)
 
 def add_user():
-    subprocess.Popen([sys.executable, 'add_member.py'])
+    # Check if window is already open
+    if open_windows['add_member'] is not None and open_windows['add_member'].poll() is None:
+        return
+    open_windows['add_member'] = subprocess.Popen([sys.executable, 'add_member.py'])
 
 def add_book():
-    subprocess.Popen([sys.executable, 'add_book.py'])
+    # Check if window is already open
+    if open_windows['add_book'] is not None and open_windows['add_book'].poll() is None:
+        return
+    open_windows['add_book'] = subprocess.Popen([sys.executable, 'add_book.py'])
 
 def weekly_report():
+    # Check if window is already open
+    if open_windows['weekly_report'] is not None and open_windows['weekly_report'].winfo_exists():
+        open_windows['weekly_report'].lift()
+        return
+
     win = tk.Toplevel(root)
     win.title("Weekly Report - Last 7 Days")
     win.geometry("800x500")
+    open_windows['weekly_report'] = win
     tk.Label(win, text="Weekly Library Report", font=("Arial", 16, "bold")).pack(pady=10)
 
     conn = get_conn()
@@ -49,9 +69,15 @@ def weekly_report():
     conn.close()
 
 def search_catalog():
+    # Check if window is already open
+    if open_windows['search_catalog'] is not None and open_windows['search_catalog'].winfo_exists():
+        open_windows['search_catalog'].lift()
+        return
+
     win = tk.Toplevel(root)
     win.title("Search Catalog")
     win.geometry("900x500")
+    open_windows['search_catalog'] = win
 
     search_frame = tk.Frame(win)
     search_frame.pack(pady=5)

@@ -34,10 +34,20 @@ def search_books():
     conn = get_conn()
     cur = conn.cursor()
     search_term = '%' + search_entry.get() + '%'
-    cur.execute("SELECT book_id, title, author, year FROM books WHERE (title LIKE %s OR author LIKE %s) AND book_status IN ('Returned', 'New') AND record_status='Active'",
+
+    # Get distinct books with available copies count
+    cur.execute("SELECT DISTINCT title, author, year FROM books WHERE (title LIKE %s OR author LIKE %s) AND record_status='Active'",
                 (search_term, search_term))
-    for row in cur.fetchall():
-        search_tree.insert('', tk.END, values=row)
+    books = cur.fetchall()
+
+    for book in books:
+        title, author, year = book[0], book[1], book[2]
+        # Count available copies for this book
+        cur.execute("SELECT COUNT(*) FROM books WHERE title=%s AND author=%s AND book_status IN ('Returned', 'New') AND record_status='Active'",
+                    (title, author))
+        available = cur.fetchone()[0]
+        search_tree.insert('', tk.END, values=(title, author, year, available))
+
     conn.close()
 
 root = tk.Tk()
@@ -87,9 +97,9 @@ search_entry = tk.Entry(search_bar, font=("Arial", 11), width=35)
 search_entry.pack(side=tk.LEFT, padx=5)
 tk.Button(search_bar, text="Search", command=search_books).pack(side=tk.LEFT, padx=5)
 
-search_cols = ('ID', 'Title', 'Author', 'Year')
+search_cols = ('Title', 'Author', 'Year', 'Available Copies')
 search_tree = ttk.Treeview(search_frame, columns=search_cols, show='headings', height=8)
-search_widths = [60, 250, 200, 80]
+search_widths = [280, 200, 80, 110]
 for i, col in enumerate(search_cols):
     search_tree.heading(col, text=col)
     search_tree.column(col, width=search_widths[i])

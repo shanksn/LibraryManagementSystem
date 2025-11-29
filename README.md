@@ -15,22 +15,25 @@ A complete Python-based Library Management System with MySQL database integratio
 - Account status verification
 
 ### 👨‍💼 Admin Features
-- **Add Members**: Create new library member accounts with full details (prevents duplicate usernames)
-- **Add Books**: Add books with ISBN, multiple copies support (1-5 copies, prevents duplicate titles by same author)
+- **Add Members**: Create new library member accounts with full details (prevents duplicate usernames, single window at a time)
+- **Add Books**: Add books with ISBN, multiple copies support (1-5 copies, prevents duplicate titles by same author, single window at a time)
 - **Search Catalog**:
   - View all books with filtering (Active/Deleted/All)
   - See total copies and available copies
   - Track borrowers with issue and due dates
   - Double-click to view all copies of a book
+  - Single window at a time (brings existing window to front)
 - **Issue Books**: Assign books to members with automatic due date calculation (15 days) - Max 3 books per member
 - **Return Books**: Process book returns from the detailed copy view
 - **Delete Books**: Soft delete books (can be restored manually)
 - **Transaction Audit Trail**: All actions tracked with admin user ID
+- **Weekly Reports**: View transaction history for last 7 days (single window at a time)
 
 ### 👤 Member Features
 - **My Borrowed Books**: View all currently issued books with due dates
-- **Search Books**: Browse available books in the library
+- **Search Books**: Browse available books in the library with available copies count
 - **Date Tracking**: See issue date and due date in dd/mm/yyyy format
+- **Clean Interface**: Search results show only book title, author, year, and available copies
 
 ---
 
