@@ -51,9 +51,9 @@ The system supports:
 - Add new library members
 - Add books to the catalog (1-5 copies at a time)
 - Search and browse book catalog
-- Issue books to members
+- Issue books to members (max 3 books per member)
 - Process book returns
-- Soft delete books
+- Soft delete books (cannot delete issued books)
 - View transaction history
 
 #### For Members:
