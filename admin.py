@@ -49,7 +49,7 @@ def weekly_report():
     conn = get_conn()
     cur = conn.cursor()
     week_ago = datetime.now() - timedelta(days=7)
-    cur.execute("SELECT action, book_id, member_id, transaction_date, notes FROM transactions WHERE transaction_date >= %s ORDER BY transaction_date DESC", (week_ago,))
+    cur.execute("SELECT action, book_id, member_id, transaction_date, notes, admin_user_id FROM transactions WHERE transaction_date >= %s ORDER BY transaction_date DESC", (week_ago,))
     transactions = cur.fetchall()
 
     cols = ('Date', 'Action', 'Book', 'Member', 'Notes')
@@ -65,13 +65,32 @@ def weekly_report():
 
     for trans in transactions:
         date_str = trans[3].strftime('%d/%m/%Y') if trans[3] else 'N/A'
-        # Get member username if member_id exists
+        action = trans[0]
+
+        # Determine who to show in Member column based on action
         member_name = 'N/A'
-        if trans[2]:
-            cur.execute("SELECT username FROM users u JOIN members m ON u.user_id = m.user_id WHERE m.member_id = %s", (trans[2],))
-            member = cur.fetchone()
-            if member:
-                member_name = member[0]
+        if action == 'Add' or action == 'Delete':
+            # For Add/Delete, show admin username
+            if trans[5]:  # admin_user_id
+                cur.execute("SELECT username FROM users WHERE user_id = %s", (trans[5],))
+                admin = cur.fetchone()
+                if admin:
+                    member_name = admin[0]
+        elif action == 'Return':
+            # For Return, show admin username (who processed the return)
+            if trans[5]:  # admin_user_id
+                cur.execute("SELECT username FROM users WHERE user_id = %s", (trans[5],))
+                admin = cur.fetchone()
+                if admin:
+                    member_name = admin[0]
+        else:
+            # For Issue, show member username
+            if trans[2]:  # member_id
+                cur.execute("SELECT username FROM users u JOIN members m ON u.user_id = m.user_id WHERE m.member_id = %s", (trans[2],))
+                member = cur.fetchone()
+                if member:
+                    member_name = member[0]
+
         tree.insert('', tk.END, values=(date_str, trans[0], trans[1], member_name, trans[4] or ''))
     conn.close()
 
@@ -194,11 +213,12 @@ def search_catalog():
             copies = cur.fetchall()
 
             for copy in copies:
-                issued_to = 'Available'
+                issued_to = 'N/A'
                 issue_date_str = 'N/A'
                 due_date_str = 'N/A'
                 # Check if book is deleted
                 book_status = copy[2] if copy[5] == 'Active' else 'Deleted'
+                # Only show member info if book is currently issued
                 if copy[3]:
                     cur.execute("SELECT name, username FROM members m JOIN users u ON m.user_id = u.user_id WHERE member_id = %s", (copy[3],))
                     member = cur.fetchone()
