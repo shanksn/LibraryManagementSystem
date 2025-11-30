@@ -116,9 +116,9 @@ def search_catalog():
         filter_status = filter_var.get()
 
         if filter_status == "All":
-            cur.execute("SELECT DISTINCT title, author, year, record_status FROM books WHERE title LIKE %s OR author LIKE %s", (search_term, search_term))
+            cur.execute("SELECT DISTINCT title, author, year, record_status FROM books WHERE title LIKE %s OR author LIKE %s OR year LIKE %s", (search_term, search_term, search_term))
         else:
-            cur.execute("SELECT DISTINCT title, author, year, record_status FROM books WHERE (title LIKE %s OR author LIKE %s) AND record_status=%s", (search_term, search_term, filter_status))
+            cur.execute("SELECT DISTINCT title, author, year, record_status FROM books WHERE (title LIKE %s OR author LIKE %s OR year LIKE %s) AND record_status=%s", (search_term, search_term, search_term, filter_status))
         books = cur.fetchall()
 
         for book in books:

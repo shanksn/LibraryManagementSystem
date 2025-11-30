@@ -36,8 +36,8 @@ def search_books():
     search_term = '%' + search_entry.get() + '%'
 
     # Get distinct books that have at least one available copy
-    cur.execute("SELECT DISTINCT title, author, year FROM books WHERE (title LIKE %s OR author LIKE %s) AND book_status IN ('Returned', 'New') AND record_status='Active'",
-                (search_term, search_term))
+    cur.execute("SELECT DISTINCT title, author, year FROM books WHERE (title LIKE %s OR author LIKE %s OR year LIKE %s) AND book_status IN ('Returned', 'New') AND record_status='Active'",
+                (search_term, search_term, search_term))
     books = cur.fetchall()
 
     for book in books:
