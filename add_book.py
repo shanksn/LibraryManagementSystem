@@ -2,7 +2,11 @@
 import tkinter as tk
 from tkinter import messagebox
 import mysql.connector
+import sys
 from config import db_config  # Import database settings from config.py
+
+# Get admin_user_id from command line argument
+admin_user_id = int(sys.argv[1]) if len(sys.argv) > 1 else None
 
 # Save new book to database
 def save():
@@ -52,8 +56,8 @@ def save():
             book_id = cur.lastrowid
 
             # Log transaction
-            cur.execute("INSERT INTO transactions (book_id, member_id, admin_user_id, action, notes) VALUES (%s, NULL, NULL, 'Add', %s)",
-                       (book_id, f"{title} by {author} (Copy {i})"))
+            cur.execute("INSERT INTO transactions (book_id, member_id, admin_user_id, action, notes) VALUES (%s, NULL, %s, 'Add', %s)",
+                       (book_id, admin_user_id, f"{title} by {author} (Copy {i})"))
 
         # Save to database
         conn.commit()

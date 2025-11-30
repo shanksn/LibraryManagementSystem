@@ -32,7 +32,8 @@ def add_book():
     # Check if window is already open
     if open_windows['add_book'] is not None and open_windows['add_book'].poll() is None:
         return
-    open_windows['add_book'] = subprocess.Popen([sys.executable, 'add_book.py'])
+    # Pass admin_user_id to add_book.py
+    open_windows['add_book'] = subprocess.Popen([sys.executable, 'add_book.py', str(admin_user_id)])
 
 def weekly_report():
     # Check if window is already open
