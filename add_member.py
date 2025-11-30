@@ -70,15 +70,15 @@ frame = tk.Frame(root)
 frame.place(relx=0.5, rely=0.5, anchor="center")
 
 # Form fields
-tk.Label(frame, text="Username:").grid(row=0, column=0, padx=5, pady=5)
+tk.Label(frame, text="Username: *").grid(row=0, column=0, padx=5, pady=5)
 username_entry = tk.Entry(frame)
 username_entry.grid(row=0, column=1, padx=5, pady=5)
 
-tk.Label(frame, text="Password:").grid(row=1, column=0, padx=5, pady=5)
+tk.Label(frame, text="Password: *").grid(row=1, column=0, padx=5, pady=5)
 password_entry = tk.Entry(frame, show="*")
 password_entry.grid(row=1, column=1, padx=5, pady=5)
 
-tk.Label(frame, text="Full Name:").grid(row=2, column=0, padx=5, pady=5)
+tk.Label(frame, text="Full Name: *").grid(row=2, column=0, padx=5, pady=5)
 name_entry = tk.Entry(frame)
 name_entry.grid(row=2, column=1, padx=5, pady=5)
 

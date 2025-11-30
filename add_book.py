@@ -83,23 +83,23 @@ frame = tk.Frame(root)
 frame.place(relx=0.5, rely=0.5, anchor="center")
 
 # Form fields
-tk.Label(frame, text="Book Title:").grid(row=0, column=0, padx=5, pady=5)
+tk.Label(frame, text="Book Title: *").grid(row=0, column=0, padx=5, pady=5)
 title_entry = tk.Entry(frame)
 title_entry.grid(row=0, column=1, padx=5, pady=5)
 
-tk.Label(frame, text="Author:").grid(row=1, column=0, padx=5, pady=5)
+tk.Label(frame, text="Author: *").grid(row=1, column=0, padx=5, pady=5)
 author_entry = tk.Entry(frame)
 author_entry.grid(row=1, column=1, padx=5, pady=5)
 
-tk.Label(frame, text="ISBN Number:").grid(row=2, column=0, padx=5, pady=5)
+tk.Label(frame, text="ISBN Number: *").grid(row=2, column=0, padx=5, pady=5)
 isbn_entry = tk.Entry(frame)
 isbn_entry.grid(row=2, column=1, padx=5, pady=5)
 
-tk.Label(frame, text="Publication Year:").grid(row=3, column=0, padx=5, pady=5)
+tk.Label(frame, text="Publication Year: *").grid(row=3, column=0, padx=5, pady=5)
 year_entry = tk.Entry(frame)
 year_entry.grid(row=3, column=1, padx=5, pady=5)
 
-tk.Label(frame, text="Number of Copies:").grid(row=4, column=0, padx=5, pady=5)
+tk.Label(frame, text="Number of Copies: *").grid(row=4, column=0, padx=5, pady=5)
 copies_entry = tk.Entry(frame)
 copies_entry.grid(row=4, column=1, padx=5, pady=5)
 

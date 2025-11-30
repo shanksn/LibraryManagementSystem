@@ -52,20 +52,27 @@ def weekly_report():
     cur.execute("SELECT action, book_id, member_id, transaction_date, notes FROM transactions WHERE transaction_date >= %s ORDER BY transaction_date DESC", (week_ago,))
     transactions = cur.fetchall()
 
-    cols = ('Date', 'Action', 'Book', 'Member ID', 'Notes')
+    cols = ('Date', 'Action', 'Book', 'Member', 'Notes')
     tree = ttk.Treeview(win, columns=cols, show='headings', height=18)
     for col in cols:
         tree.heading(col, text=col)
     tree.column('Date', width=100)
     tree.column('Action', width=80)
     tree.column('Book', width=80)
-    tree.column('Member ID', width=80)
-    tree.column('Notes', width=400)
+    tree.column('Member', width=120)
+    tree.column('Notes', width=360)
     tree.pack(pady=10, padx=10, fill=tk.BOTH, expand=True)
 
     for trans in transactions:
         date_str = trans[3].strftime('%d/%m/%Y') if trans[3] else 'N/A'
-        tree.insert('', tk.END, values=(date_str, trans[0], trans[1], trans[2] or 'N/A', trans[4] or ''))
+        # Get member username if member_id exists
+        member_name = 'N/A'
+        if trans[2]:
+            cur.execute("SELECT username FROM users u JOIN members m ON u.user_id = m.user_id WHERE m.member_id = %s", (trans[2],))
+            member = cur.fetchone()
+            if member:
+                member_name = member[0]
+        tree.insert('', tk.END, values=(date_str, trans[0], trans[1], member_name, trans[4] or ''))
     conn.close()
 
 def search_catalog():
@@ -124,11 +131,21 @@ def search_catalog():
             else:
                 cur.execute("SELECT COUNT(*) FROM books WHERE title=%s AND author=%s AND record_status=%s", (title, author, filter_status))
                 total = cur.fetchone()[0]
-                cur.execute("SELECT COUNT(*) FROM books WHERE title=%s AND author=%s AND book_status IN ('Returned', 'New') AND record_status=%s", (title, author, filter_status))
-                available = cur.fetchone()[0]
+                if filter_status == "Deleted":
+                    # For deleted books, show 0 available
+                    available = 0
+                else:
+                    cur.execute("SELECT COUNT(*) FROM books WHERE title=%s AND author=%s AND book_status IN ('Returned', 'New') AND record_status=%s", (title, author, filter_status))
+                    available = cur.fetchone()[0]
 
             status_suffix = f" [{rec_status}]" if filter_status == "All" and rec_status == "Deleted" else ""
-            action_text = "Double-click to view copies"
+            # Set action text based on record status
+            if rec_status == "Deleted":
+                action_text = "Deleted Book"
+            elif filter_status == "Deleted":
+                action_text = "Deleted Book"
+            else:
+                action_text = "Double-click to view copies"
             tree.insert('', tk.END, values=(book[0] + status_suffix, book[1], book[2], total, available, action_text))
         conn.close()
 
@@ -142,6 +159,11 @@ def search_catalog():
         sel = tree.selection()
         if not sel: return
         item_values = tree.item(sel[0])['values']
+
+        # Don't allow double-click on deleted books
+        if item_values[5] == "Deleted Book":
+            return
+
         title = item_values[0].replace(" [Deleted]", "")
         author = item_values[1]
 
@@ -168,13 +190,15 @@ def search_catalog():
             # Reload copy data from database
             conn = get_conn()
             cur = conn.cursor()
-            cur.execute("SELECT book_id, copy_number, book_status, issued_to_member_id, issue_date FROM books WHERE title=%s AND author=%s", (title, author))
+            cur.execute("SELECT book_id, copy_number, book_status, issued_to_member_id, issue_date, record_status FROM books WHERE title=%s AND author=%s", (title, author))
             copies = cur.fetchall()
 
             for copy in copies:
                 issued_to = 'Available'
                 issue_date_str = 'N/A'
                 due_date_str = 'N/A'
+                # Check if book is deleted
+                book_status = copy[2] if copy[5] == 'Active' else 'Deleted'
                 if copy[3]:
                     cur.execute("SELECT name, username FROM members m JOIN users u ON m.user_id = u.user_id WHERE member_id = %s", (copy[3],))
                     member = cur.fetchone()
@@ -184,7 +208,7 @@ def search_catalog():
                     issue_date_str = copy[4].strftime('%d/%m/%Y')
                     due_date = copy[4] + timedelta(days=15)
                     due_date_str = due_date.strftime('%d/%m/%Y')
-                copy_tree.insert('', tk.END, values=(copy[0], copy[1], copy[2], issued_to, issue_date_str, due_date_str))
+                copy_tree.insert('', tk.END, values=(copy[0], copy[1], book_status, issued_to, issue_date_str, due_date_str))
             conn.close()
 
         # Load initial data
