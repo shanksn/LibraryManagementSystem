@@ -1030,13 +1030,12 @@ Screenshot should show:
 - Table with columns:
   * Title
   * Author
-  * ISBN
   * Year
   * Available Copies
-- Multiple book rows
+- Multiple book rows (only books with available copies)
 - NO action buttons (no Issue, Return, Delete)
 - Only "Close" button
-- Filter showing only "Active" books
+- Shows only books that can be borrowed
 ```
 
 **Step 3**: Use search bar to find books
