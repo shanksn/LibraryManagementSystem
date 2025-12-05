@@ -104,6 +104,14 @@ def search_catalog():
     win = tk.Toplevel(root)
     win.title("Search Catalog")
     win.geometry("900x500")
+
+    # Set window icon
+    try:
+        icon_image = tk.PhotoImage(file='search_catalog.png')
+        win.iconphoto(False, icon_image)
+    except:
+        pass  # If icon file not found, continue without it
+
     open_windows['search_catalog'] = win
 
     search_frame = tk.Frame(win)
