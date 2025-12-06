@@ -408,7 +408,7 @@ icon_files = {
 
 for name, file in icon_files.items():
     try:
-        img = Image.open(file).resize((30, 30))
+        img = Image.open(file).resize((50, 50))
         button_icons[name] = ImageTk.PhotoImage(img)
     except:
         button_icons[name] = None
