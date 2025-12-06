@@ -57,15 +57,8 @@ root.title("Library Management System")
 root.geometry("800x600")
 root.resizable(False, False)
 
-# Set window icon (if icon file exists)
-try:
-    icon_img = tk.PhotoImage(file='library_icon.png')
-    root.iconphoto(True, icon_img)
-except:
-    pass  # If icon file doesn't exist, use default
-
 # Load and display background image
-bg_image = Image.open("library.jpeg").resize((800, 600))
+bg_image = Image.open("images/library.jpeg").resize((800, 600))
 bg_photo = ImageTk.PhotoImage(bg_image)
 canvas = tk.Canvas(root, width=800, height=600)
 canvas.pack()
