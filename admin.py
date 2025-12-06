@@ -7,7 +7,6 @@ import mysql.connector
 import subprocess
 import sys
 from datetime import datetime, timedelta
-from PIL import Image, ImageTk
 from config import db_config
 
 admin_user_id = int(sys.argv[1]) if len(sys.argv) > 1 else None
@@ -385,17 +384,6 @@ root.geometry(f'800x600+{x}+{y}')
 
 header = tk.Frame(root, bg="#2196F3", height=80)
 header.pack(fill=tk.X)
-
-# Load and display admin icon next to heading
-try:
-    admin_icon_img = Image.open("images/admin_portal.png").resize((40, 40))
-    admin_icon_photo = ImageTk.PhotoImage(admin_icon_img)
-    tk.Label(header, image=admin_icon_photo, bg="#2196F3").place(x=230, y=20)
-    # Keep reference to prevent garbage collection
-    header.admin_icon = admin_icon_photo
-except:
-    pass  # If icon not found, continue without it
-
 tk.Label(header, text="Admin Dashboard", font=("Arial", 18, "bold"), bg="#2196F3", fg="white").place(x=280, y=25)
 tk.Button(header, text="Logout", font=("Arial", 10), command=root.destroy).place(x=700, y=25)
 
@@ -405,34 +393,8 @@ content.pack(fill=tk.BOTH, expand=True, padx=40, pady=40)
 button_container = tk.Frame(content, bg="#f5f5f5")
 button_container.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
 
-# Load button icons
-button_icons = {}
-icon_files = {
-    "Add Member": "images/add_member.png",
-    "Add Book": "images/add_books.png",
-    "Search Catalog": "images/search_catalog.png",
-    "Weekly Reports": "images/weekly_report.png"
-}
-
-for name, file in icon_files.items():
-    try:
-        img = Image.open(file).resize((30, 30))
-        button_icons[name] = ImageTk.PhotoImage(img)
-    except:
-        button_icons[name] = None
-
 buttons = [("Add Member", add_user), ("Add Book", add_book), ("Search Catalog", search_catalog), ("Weekly Reports", weekly_report)]
 for i, (text, cmd) in enumerate(buttons):
-    btn_frame = tk.Frame(button_container, bg="#f5f5f5")
-    btn_frame.grid(row=i//2, column=i%2, padx=20, pady=20)
-
-    # Add icon if available
-    if button_icons.get(text):
-        tk.Label(btn_frame, image=button_icons[text], bg="#f5f5f5").pack(side=tk.TOP, pady=5)
-
-    tk.Button(btn_frame, text=text, font=("Arial", 12, "bold"), width=20, height=2, command=cmd).pack(side=tk.TOP)
-
-# Keep references to prevent garbage collection
-root.button_icons = button_icons
+    tk.Button(button_container, text=text, font=("Arial", 12, "bold"), width=20, height=2, command=cmd).grid(row=i//2, column=i%2, padx=20, pady=20)
 
 root.mainloop()

@@ -4,7 +4,6 @@ from tkinter import ttk
 import mysql.connector
 import sys
 from datetime import timedelta
-from PIL import Image, ImageTk
 from config import db_config  # Import database settings from config.py
 
 user_id = int(sys.argv[1]) if len(sys.argv) > 1 else 1
@@ -67,18 +66,7 @@ root.geometry(f'800x600+{x}+{y}')
 # Header
 header = tk.Frame(root, bg="#4CAF50", height=70)
 header.pack(fill=tk.X)
-
-# Load and display member icon next to heading
-try:
-    member_icon_img = Image.open("images/member_portal.png").resize((40, 40))
-    member_icon_photo = ImageTk.PhotoImage(member_icon_img)
-    tk.Label(header, image=member_icon_photo, bg="#4CAF50").place(x=280, y=15)
-    # Keep reference to prevent garbage collection
-    header.member_icon = member_icon_photo
-except:
-    pass  # If icon not found, continue without it
-
-tk.Label(header, text="Member Portal", font=("Arial", 18, "bold"), bg="#4CAF50", fg="white").place(x=330, y=20)
+tk.Label(header, text="Member Portal", font=("Arial", 18, "bold"), bg="#4CAF50", fg="white").pack(pady=20)
 tk.Button(header, text="Logout", font=("Arial", 10), command=root.destroy).place(x=700, y=20)
 
 # Main container
