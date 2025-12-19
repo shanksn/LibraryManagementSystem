@@ -3,7 +3,7 @@ import tkinter as tk
 from tkinter import ttk
 import mysql.connector
 import sys
-from datetime import timedelta
+from datetime import datetime, timedelta
 from PIL import Image, ImageTk
 from config import db_config  # Import database settings from config.py
 
@@ -18,16 +18,37 @@ def refresh_borrowed():
     cur = conn.cursor()
     cur.execute("SELECT member_id FROM members WHERE user_id=%s", (user_id,))
     member = cur.fetchone()
+    has_overdue = False
     if member:
         cur.execute("SELECT book_id, title, author, year, issue_date FROM books WHERE issued_to_member_id=%s AND book_status='Issued'", (member[0],))
+        today = datetime.now().date()
         for book in cur.fetchall():
             issue_date_str = 'N/A'
             due_date_str = 'N/A'
+            is_overdue = False
             if book[4]:
                 issue_date_str = book[4].strftime('%d/%m/%Y')
                 due_date = book[4] + timedelta(days=15)
                 due_date_str = due_date.strftime('%d/%m/%Y')
-            borrowed_tree.insert('', tk.END, values=(book[0], book[1], book[2], book[3], issue_date_str, due_date_str))
+                # Check if overdue
+                if due_date < today:
+                    is_overdue = True
+                    has_overdue = True
+
+            # Insert row and tag if overdue
+            item_id = borrowed_tree.insert('', tk.END, values=(book[0], book[1], book[2], book[3], issue_date_str, due_date_str))
+            if is_overdue:
+                borrowed_tree.item(item_id, tags=('overdue',))
+
+    # Configure tag for overdue books
+    borrowed_tree.tag_configure('overdue', background='#ffcccc')
+
+    # Update legend visibility
+    if has_overdue:
+        overdue_legend.pack(pady=5)
+    else:
+        overdue_legend.pack_forget()
+
     conn.close()
 
 def search_books():
@@ -98,6 +119,11 @@ for i, col in enumerate(cols):
     borrowed_tree.heading(col, text=col)
     borrowed_tree.column(col, width=widths[i])
 borrowed_tree.pack(pady=5, padx=10, fill=tk.BOTH, expand=True)
+
+# Legend for overdue books (initially hidden)
+overdue_legend = tk.Label(borrowed_frame, text="⚠ Red highlighted books are overdue. Please contact admin.",
+                          font=("Arial", 10, "bold"), bg="#ffcccc", fg="#cc0000", relief=tk.SOLID, bd=1, padx=10, pady=5)
+# Don't pack yet - will be shown only if there are overdue books
 
 # Search Books section
 search_frame = tk.Frame(main, bg="white", relief=tk.RAISED, bd=1)

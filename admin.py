@@ -17,11 +17,41 @@ open_windows = {
     'add_member': None,
     'add_book': None,
     'search_catalog': None,
-    'weekly_report': None
+    'weekly_report': None,
+    'defaulters_list': None,
+    'view_users': None
 }
 
 def get_conn():
     return mysql.connector.connect(**db_config)
+
+def get_overdue_books(member_id, cur):
+    """Helper function to get list of overdue books for a member"""
+    today = datetime.now().date()
+    cur.execute("SELECT title, author, issue_date FROM books WHERE issued_to_member_id = %s AND book_status = 'Issued'", (member_id,))
+    issued_books = cur.fetchall()
+    overdue_books = []
+    for book in issued_books:
+        due_date = book[2] + timedelta(days=15)
+        if due_date < today:
+            days_overdue = (today - due_date).days
+            overdue_books.append(f"{book[0]} by {book[1]} ({days_overdue} days overdue)")
+    return overdue_books
+
+def create_list_window(title, size, columns, widths):
+    """Helper function to create a standard list/report window with Treeview"""
+    win = tk.Toplevel(root)
+    win.title(title)
+    win.geometry(size)
+    tk.Label(win, text=title, font=("Arial", 16, "bold")).pack(pady=10)
+
+    tree = ttk.Treeview(win, columns=columns, show='headings', height=18)
+    for i, col in enumerate(columns):
+        tree.heading(col, text=col)
+        tree.column(col, width=widths[i])
+    tree.pack(pady=10, padx=10, fill=tk.BOTH, expand=True)
+
+    return win, tree
 
 def add_user():
     # Check if window is already open
@@ -42,28 +72,16 @@ def weekly_report():
         open_windows['weekly_report'].lift()
         return
 
-    win = tk.Toplevel(root)
-    win.title("Weekly Report - Last 7 Days")
-    win.geometry("800x500")
+    cols = ('Date', 'Action', 'Book', 'Member', 'Notes')
+    widths = [100, 80, 80, 120, 360]
+    win, tree = create_list_window("Weekly Library Report", "800x500", cols, widths)
     open_windows['weekly_report'] = win
-    tk.Label(win, text="Weekly Library Report", font=("Arial", 16, "bold")).pack(pady=10)
 
     conn = get_conn()
     cur = conn.cursor()
     week_ago = datetime.now() - timedelta(days=7)
     cur.execute("SELECT action, book_id, member_id, transaction_date, notes, admin_user_id FROM transactions WHERE transaction_date >= %s ORDER BY transaction_date DESC", (week_ago,))
     transactions = cur.fetchall()
-
-    cols = ('Date', 'Action', 'Book', 'Member', 'Notes')
-    tree = ttk.Treeview(win, columns=cols, show='headings', height=18)
-    for col in cols:
-        tree.heading(col, text=col)
-    tree.column('Date', width=100)
-    tree.column('Action', width=80)
-    tree.column('Book', width=80)
-    tree.column('Member', width=120)
-    tree.column('Notes', width=360)
-    tree.pack(pady=10, padx=10, fill=tk.BOTH, expand=True)
 
     for trans in transactions:
         date_str = trans[3].strftime('%d/%m/%Y') if trans[3] else 'N/A'
@@ -94,6 +112,91 @@ def weekly_report():
                     member_name = member[0]
 
         tree.insert('', tk.END, values=(date_str, trans[0], trans[1], member_name, trans[4] or ''))
+    conn.close()
+
+def defaulters_list():
+    # Check if window is already open
+    if open_windows['defaulters_list'] is not None and open_windows['defaulters_list'].winfo_exists():
+        open_windows['defaulters_list'].lift()
+        return
+
+    cols = ('Member Name', 'Email', 'Phone', 'Book Title', 'Author', 'Due Date', 'Days Overdue')
+    widths = [120, 150, 100, 180, 120, 90, 100]
+    win, tree = create_list_window("Defaulters List - Overdue Books", "900x500", cols, widths)
+    open_windows['defaulters_list'] = win
+
+    conn = get_conn()
+    cur = conn.cursor()
+    today = datetime.now().date()
+
+    # Get all issued books with due dates in the past
+    cur.execute("""
+        SELECT b.title, b.author, b.issue_date, m.name, m.email, m.phone, b.book_id
+        FROM books b
+        JOIN members m ON b.issued_to_member_id = m.member_id
+        WHERE b.book_status = 'Issued' AND b.issue_date IS NOT NULL
+    """)
+    issued_books = cur.fetchall()
+
+    defaulters_found = False
+    for book in issued_books:
+        title, author, issue_date, member_name, email, phone, book_id = book
+        due_date = issue_date + timedelta(days=15)
+
+        # Check if overdue
+        if due_date < today:
+            defaulters_found = True
+            days_overdue = (today - due_date).days
+            due_date_str = due_date.strftime('%d/%m/%Y')
+            tree.insert('', tk.END, values=(
+                member_name,
+                email or 'N/A',
+                phone or 'N/A',
+                title,
+                author,
+                due_date_str,
+                days_overdue
+            ))
+
+    if not defaulters_found:
+        tk.Label(win, text="No overdue books found!", font=("Arial", 12), fg="green").pack(pady=20)
+
+    conn.close()
+
+def view_users():
+    # Check if window is already open
+    if open_windows['view_users'] is not None and open_windows['view_users'].winfo_exists():
+        open_windows['view_users'].lift()
+        return
+
+    cols = ('Username', 'User Type', 'Date Added', 'Email', 'Phone')
+    widths = [150, 100, 150, 250, 150]
+    win, tree = create_list_window("All Users", "900x500", cols, widths)
+    open_windows['view_users'] = win
+
+    conn = get_conn()
+    cur = conn.cursor()
+
+    # Get all users with their member details
+    cur.execute("""
+        SELECT u.username, u.user_type, u.created_date, m.email, m.phone
+        FROM users u
+        LEFT JOIN members m ON u.user_id = m.user_id
+        ORDER BY u.created_date DESC
+    """)
+    users = cur.fetchall()
+
+    for user in users:
+        username, user_type, created_date, email, phone = user
+        date_str = created_date.strftime('%d/%m/%Y %H:%M') if created_date else 'N/A'
+        tree.insert('', tk.END, values=(
+            username,
+            user_type.title(),
+            date_str,
+            email or 'N/A',
+            phone or 'N/A'
+        ))
+
     conn.close()
 
 def search_catalog():
@@ -297,6 +400,14 @@ def search_catalog():
                 cur.execute("SELECT member_id FROM members WHERE user_id = %s", (user[0],))
                 member = cur.fetchone()
                 if member:
+                    # Check if member has any overdue books (PRIORITY CHECK - must come first)
+                    overdue_books = get_overdue_books(member[0], cur)
+                    if overdue_books:
+                        conn.close()
+                        overdue_list = "\n".join(overdue_books)
+                        messagebox.showerror("Error", f"Cannot issue book to '{member_username}'.\n\nMember has overdue books:\n{overdue_list}\n\nPlease return overdue books first.")
+                        return
+
                     # Check if member already has 3 books (borrowing limit)
                     cur.execute("SELECT COUNT(*) FROM books WHERE issued_to_member_id = %s AND book_status = 'Issued'", (member[0],))
                     current_books = cur.fetchone()[0]
@@ -336,6 +447,17 @@ def search_catalog():
 
         conn = get_conn()
         cur = conn.cursor()
+
+        # Check if book is already deleted
+        cur.execute("SELECT COUNT(*) FROM books WHERE title=%s AND author=%s AND record_status='Deleted'", (title, author))
+        deleted_count = cur.fetchone()[0]
+        cur.execute("SELECT COUNT(*) FROM books WHERE title=%s AND author=%s", (title, author))
+        total_count = cur.fetchone()[0]
+
+        if deleted_count > 0 and deleted_count == total_count:
+            conn.close()
+            messagebox.showerror("Error", f"Cannot delete '{title}' by {author}.\n\nThis book is already deleted.")
+            return
 
         # Check if any copy of this book is currently issued
         cur.execute("SELECT COUNT(*) FROM books WHERE title=%s AND author=%s AND book_status='Issued'", (title, author))
@@ -402,8 +524,10 @@ button_icons = {}
 icon_files = {
     "Add Member": "images/add_member.png",
     "Add Book": "images/add_books.png",
+    "View Users": "images/view_users.png",
     "Search Catalog": "images/search_catalog.png",
-    "Weekly Reports": "images/weekly_report.png"
+    "Weekly Reports": "images/weekly_report.png",
+    "Defaulters List": "images/defaulters_list.png"
 }
 
 for name, file in icon_files.items():
@@ -413,10 +537,12 @@ for name, file in icon_files.items():
     except:
         button_icons[name] = None
 
-buttons = [("Add Member", add_user), ("Add Book", add_book), ("Search Catalog", search_catalog), ("Weekly Reports", weekly_report)]
+buttons = [("Add Member", add_user), ("Add Book", add_book), ("View Users", view_users), ("Search Catalog", search_catalog), ("Weekly Reports", weekly_report), ("Defaulters List", defaulters_list)]
+
+# 3x2 grid layout for 6 buttons
 for i, (text, cmd) in enumerate(buttons):
     btn_frame = tk.Frame(button_container, bg="#f5f5f5")
-    btn_frame.grid(row=i//2, column=i%2, padx=20, pady=20)
+    btn_frame.grid(row=i//3, column=i%3, padx=20, pady=20)
 
     # Add icon if available
     if button_icons.get(text):

@@ -86,29 +86,31 @@ root.resizable(False, False)
 frame = tk.Frame(root)
 frame.place(relx=0.5, rely=0.5, anchor="center")
 
-# Form fields
-tk.Label(frame, text="Book Title: *").grid(row=0, column=0, padx=5, pady=5)
-title_entry = tk.Entry(frame)
+# Form fields with right-aligned labels
+tk.Label(frame, text="Book Title: *", anchor="e", width=20).grid(row=0, column=0, padx=5, pady=5, sticky="e")
+title_entry = tk.Entry(frame, width=30)
 title_entry.grid(row=0, column=1, padx=5, pady=5)
 
-tk.Label(frame, text="Author: *").grid(row=1, column=0, padx=5, pady=5)
-author_entry = tk.Entry(frame)
+tk.Label(frame, text="Author: *", anchor="e", width=20).grid(row=1, column=0, padx=5, pady=5, sticky="e")
+author_entry = tk.Entry(frame, width=30)
 author_entry.grid(row=1, column=1, padx=5, pady=5)
 
-tk.Label(frame, text="ISBN Number: *").grid(row=2, column=0, padx=5, pady=5)
-isbn_entry = tk.Entry(frame)
+tk.Label(frame, text="ISBN Number: *", anchor="e", width=20).grid(row=2, column=0, padx=5, pady=5, sticky="e")
+isbn_entry = tk.Entry(frame, width=30)
 isbn_entry.grid(row=2, column=1, padx=5, pady=5)
 
-tk.Label(frame, text="Publication Year: *").grid(row=3, column=0, padx=5, pady=5)
-year_entry = tk.Entry(frame)
+tk.Label(frame, text="Publication Year: *", anchor="e", width=20).grid(row=3, column=0, padx=5, pady=5, sticky="e")
+year_entry = tk.Entry(frame, width=30)
 year_entry.grid(row=3, column=1, padx=5, pady=5)
 
-tk.Label(frame, text="Number of Copies: *").grid(row=4, column=0, padx=5, pady=5)
-copies_entry = tk.Entry(frame)
+tk.Label(frame, text="Number of Copies: *", anchor="e", width=20).grid(row=4, column=0, padx=5, pady=5, sticky="e")
+copies_entry = tk.Entry(frame, width=30)
 copies_entry.grid(row=4, column=1, padx=5, pady=5)
 
-# Buttons
-tk.Button(frame, text="Save", command=save).grid(row=5, column=0, pady=10)
-tk.Button(frame, text="Reset", command=reset).grid(row=5, column=1, pady=10)
+# Buttons - center aligned relative to form fields
+button_frame = tk.Frame(frame)
+button_frame.grid(row=5, column=0, columnspan=2, pady=10)
+tk.Button(button_frame, text="Save", command=save, width=12).pack(side=tk.LEFT, padx=5)
+tk.Button(button_frame, text="Reset", command=reset, width=12).pack(side=tk.LEFT, padx=5)
 
 root.mainloop()
