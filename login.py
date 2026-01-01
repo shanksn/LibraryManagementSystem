@@ -1,37 +1,36 @@
-# Import required libraries
+# Import libraries
 import tkinter as tk
 from tkinter import messagebox
 import mysql.connector
 import subprocess
 import sys
 from PIL import Image, ImageTk
-from config import db_config  # Import database settings from config.py
+from config import db_config
 
-# Login function (event parameter optional for Enter key binding)
 def login(event=None):
-    # Get username and password from entry fields
+    # Get input values
     username = username_entry.get().strip()
     password = password_entry.get().strip()
 
-    # Check if fields are empty
+    # Validate input
     if not username or not password:
         messagebox.showerror("Error", "Enter username and password")
         return
 
-    # Connect to database
+    # Database connection
     conn = mysql.connector.connect(**db_config)
     cursor = conn.cursor()
 
-    # Check if user exists in database
-    cursor.execute("SELECT user_id, full_name, user_type, status FROM users WHERE username=%s AND password=%s", (username, password))
+    # Query user credentials
+    query = """SELECT user_id, full_name, user_type, status
+               FROM users WHERE username=%s AND password=%s"""
+    cursor.execute(query, (username, password))
     result = cursor.fetchone()
     conn.close()
 
-    # Check login result
+    # Process login result
     if result:
-        # User exists - check if account is active
         if result[3] == 'active':
-            # Account is active - proceed with login
             user_id = result[0]
             user_name = result[1]
             user_type = result[2]
@@ -39,53 +38,56 @@ def login(event=None):
             messagebox.showinfo("Success", f"Welcome, {user_name}!")
             root.destroy()
 
-            # Open admin or member screen based on user type
+            # Launch appropriate portal
             if user_type == 'admin':
                 subprocess.Popen([sys.executable, 'admin.py', str(user_id)])
             else:
                 subprocess.Popen([sys.executable, 'member.py', str(user_id)])
         else:
-            # Account exists but is inactive
-            messagebox.showerror("Error", "Account is inactive. Please contact administrator.")
+            messagebox.showerror("Error",
+                "Account is inactive. Contact administrator.")
     else:
-        # Invalid username or password
         messagebox.showerror("Error", "Invalid username or password")
 
-# Create main window
+# Main window setup
 root = tk.Tk()
 root.title("Library Management System")
 root.geometry("800x600")
 root.resizable(False, False)
 
-# Load and display background image
+# Background image
 bg_image = Image.open("images/library.jpeg").resize((800, 600))
 bg_photo = ImageTk.PhotoImage(bg_image)
 canvas = tk.Canvas(root, width=800, height=600)
 canvas.pack()
 canvas.create_image(0, 0, image=bg_photo, anchor=tk.NW)
 
-# Create white login box in center
+# Login frame
 frame = tk.Frame(canvas, bg="white", relief=tk.RAISED, bd=2)
 canvas.create_window(400, 300, window=frame, width=350, height=280)
 
-# Add title
-tk.Label(frame, text="Library Management System", font=("Arial", 16, "bold"), bg="white", fg="#2196F3").pack(pady=15)
+# Title
+tk.Label(frame, text="Library Management System",
+         font=("Arial", 16, "bold"), bg="white", fg="#2196F3").pack(pady=15)
 
-# Username field
-tk.Label(frame, text="Username", font=("Arial", 11, "bold"), bg="white", fg="#333").pack(pady=5)
+# Username
+tk.Label(frame, text="Username", font=("Arial", 11, "bold"),
+         bg="white", fg="#333").pack(pady=5)
 username_entry = tk.Entry(frame, font=("Arial", 11), width=25)
 username_entry.pack(pady=5)
 
-# Password field
-tk.Label(frame, text="Password", font=("Arial", 11, "bold"), bg="white", fg="#333").pack(pady=5)
+# Password
+tk.Label(frame, text="Password", font=("Arial", 11, "bold"),
+         bg="white", fg="#333").pack(pady=5)
 password_entry = tk.Entry(frame, font=("Arial", 11), width=25, show="*")
 password_entry.pack(pady=5)
 
 # Login button
-tk.Button(frame, text="Login", font=("Arial", 11, "bold"), width=15, command=login).pack(pady=15)
+tk.Button(frame, text="Login", font=("Arial", 11, "bold"),
+          width=15, command=login).pack(pady=15)
 
-# Allow Enter key to login
+# Enter key binding
 password_entry.bind('<Return>', login)
 
-# Start the application
+# Run application
 root.mainloop()

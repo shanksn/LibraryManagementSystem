@@ -1,11 +1,12 @@
-"""Member Screen - Library Management System"""
+# Member Portal - Library Management System
+
 import tkinter as tk
 from tkinter import ttk
 import mysql.connector
 import sys
 from datetime import datetime, timedelta
 from PIL import Image, ImageTk
-from config import db_config  # Import database settings from config.py
+from config import db_config
 
 user_id = int(sys.argv[1]) if len(sys.argv) > 1 else 1
 
@@ -13,14 +14,18 @@ def get_conn():
     return mysql.connector.connect(**db_config)
 
 def refresh_borrowed():
-    for row in borrowed_tree.get_children(): borrowed_tree.delete(row)
+    for row in borrowed_tree.get_children():
+        borrowed_tree.delete(row)
     conn = get_conn()
     cur = conn.cursor()
     cur.execute("SELECT member_id FROM members WHERE user_id=%s", (user_id,))
     member = cur.fetchone()
     has_overdue = False
     if member:
-        cur.execute("SELECT book_id, title, author, year, issue_date FROM books WHERE issued_to_member_id=%s AND book_status='Issued'", (member[0],))
+        query = """SELECT book_id, title, author, year, issue_date
+                   FROM books WHERE issued_to_member_id=%s
+                   AND book_status='Issued'"""
+        cur.execute(query, (member[0],))
         today = datetime.now().date()
         for book in cur.fetchall():
             issue_date_str = 'N/A'
@@ -30,20 +35,18 @@ def refresh_borrowed():
                 issue_date_str = book[4].strftime('%d/%m/%Y')
                 due_date = book[4] + timedelta(days=15)
                 due_date_str = due_date.strftime('%d/%m/%Y')
-                # Check if overdue
                 if due_date < today:
                     is_overdue = True
                     has_overdue = True
 
-            # Insert row and tag if overdue
-            item_id = borrowed_tree.insert('', tk.END, values=(book[0], book[1], book[2], book[3], issue_date_str, due_date_str))
+            item_id = borrowed_tree.insert('', tk.END, values=(
+                book[0], book[1], book[2], book[3],
+                issue_date_str, due_date_str))
             if is_overdue:
                 borrowed_tree.item(item_id, tags=('overdue',))
 
-    # Configure tag for overdue books
     borrowed_tree.tag_configure('overdue', background='#ffcccc')
 
-    # Update legend visibility
     if has_overdue:
         overdue_legend.pack(pady=5)
     else:
@@ -52,34 +55,39 @@ def refresh_borrowed():
     conn.close()
 
 def search_books():
-    for row in search_tree.get_children(): search_tree.delete(row)
+    for row in search_tree.get_children():
+        search_tree.delete(row)
     conn = get_conn()
     cur = conn.cursor()
     search_term = '%' + search_entry.get() + '%'
 
-    # Get distinct books that have at least one available copy
-    cur.execute("SELECT DISTINCT title, author, year FROM books WHERE (title LIKE %s OR author LIKE %s OR year LIKE %s) AND book_status IN ('Returned', 'New') AND record_status='Active'",
-                (search_term, search_term, search_term))
+    query = """SELECT DISTINCT title, author, year FROM books
+               WHERE (title LIKE %s OR author LIKE %s OR year LIKE %s)
+               AND book_status IN ('Returned', 'New')
+               AND record_status='Active'"""
+    cur.execute(query, (search_term, search_term, search_term))
     books = cur.fetchall()
 
     for book in books:
         title, author, year = book[0], book[1], book[2]
-        # Count available copies for this book
-        cur.execute("SELECT COUNT(*) FROM books WHERE title=%s AND author=%s AND book_status IN ('Returned', 'New') AND record_status='Active'",
-                    (title, author))
+        cur.execute("""SELECT COUNT(*) FROM books WHERE title=%s
+                     AND author=%s AND book_status IN ('Returned', 'New')
+                     AND record_status='Active'""", (title, author))
         available = cur.fetchone()[0]
 
-        # Only show if there are available copies
         if available > 0:
-            search_tree.insert('', tk.END, values=(title, author, year, available))
+            search_tree.insert('', tk.END, values=(
+                title, author, year, available))
 
     conn.close()
 
+# Main window
 root = tk.Tk()
 root.title("Library Management System - Member")
 root.geometry("800x600")
 root.resizable(False, False)
 
+# Center window
 root.update_idletasks()
 x = (root.winfo_screenwidth() // 2) - 400
 y = (root.winfo_screenheight() // 2) - 300
@@ -89,64 +97,73 @@ root.geometry(f'800x600+{x}+{y}')
 header = tk.Frame(root, bg="#4CAF50", height=70)
 header.pack(fill=tk.X)
 
-# Load and display member icon next to heading
+# Member icon
 try:
     member_icon_img = Image.open("images/member_portal.png").resize((40, 40))
     member_icon_photo = ImageTk.PhotoImage(member_icon_img)
-    tk.Label(header, image=member_icon_photo, bg="#4CAF50").place(x=280, y=15)
-    # Keep reference to prevent garbage collection
+    tk.Label(header, image=member_icon_photo,
+            bg="#4CAF50").place(x=280, y=15)
     header.member_icon = member_icon_photo
 except:
-    pass  # If icon not found, continue without it
+    pass
 
-tk.Label(header, text="Member Portal", font=("Arial", 18, "bold"), bg="#4CAF50", fg="white").place(x=330, y=20)
-tk.Button(header, text="Logout", font=("Arial", 10), command=root.destroy).place(x=700, y=20)
+tk.Label(header, text="Member Portal", font=("Arial", 18, "bold"),
+         bg="#4CAF50", fg="white").place(x=330, y=20)
+tk.Button(header, text="Logout", font=("Arial", 10),
+         command=root.destroy).place(x=700, y=20)
 
 # Main container
 main = tk.Frame(root, bg="#f5f5f5")
 main.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
-# My Borrowed Books section
+# Borrowed books section
 borrowed_frame = tk.Frame(main, bg="white", relief=tk.RAISED, bd=1)
 borrowed_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 5))
 
-tk.Label(borrowed_frame, text="My Borrowed Books", font=("Arial", 14, "bold"), bg="white").pack(pady=10)
+tk.Label(borrowed_frame, text="My Borrowed Books",
+        font=("Arial", 14, "bold"), bg="white").pack(pady=10)
 
 cols = ('ID', 'Title', 'Author', 'Year', 'Issue Date', 'Due Date')
-borrowed_tree = ttk.Treeview(borrowed_frame, columns=cols, show='headings', height=5)
+borrowed_tree = ttk.Treeview(borrowed_frame, columns=cols,
+                            show='headings', height=5)
 widths = [50, 200, 150, 80, 100, 100]
 for i, col in enumerate(cols):
     borrowed_tree.heading(col, text=col)
     borrowed_tree.column(col, width=widths[i])
 borrowed_tree.pack(pady=5, padx=10, fill=tk.BOTH, expand=True)
 
-# Legend for overdue books (initially hidden)
-overdue_legend = tk.Label(borrowed_frame, text="⚠ Red highlighted books are overdue. Please contact admin.",
-                          font=("Arial", 10, "bold"), bg="#ffcccc", fg="#cc0000", relief=tk.SOLID, bd=1, padx=10, pady=5)
-# Don't pack yet - will be shown only if there are overdue books
+# Overdue legend
+overdue_legend = tk.Label(borrowed_frame,
+    text="⚠ Red highlighted books are overdue. Please contact admin.",
+    font=("Arial", 10, "bold"), bg="#ffcccc", fg="#cc0000",
+    relief=tk.SOLID, bd=1, padx=10, pady=5)
 
-# Search Books section
+# Search section
 search_frame = tk.Frame(main, bg="white", relief=tk.RAISED, bd=1)
 search_frame.pack(fill=tk.BOTH, expand=True)
 
-tk.Label(search_frame, text="Search Available Books", font=("Arial", 14, "bold"), bg="white").pack(pady=10)
+tk.Label(search_frame, text="Search Available Books",
+        font=("Arial", 14, "bold"), bg="white").pack(pady=10)
 
 search_bar = tk.Frame(search_frame, bg="white")
 search_bar.pack()
 tk.Label(search_bar, text="Search:", bg="white").pack(side=tk.LEFT, padx=5)
 search_entry = tk.Entry(search_bar, font=("Arial", 11), width=35)
 search_entry.pack(side=tk.LEFT, padx=5)
-tk.Button(search_bar, text="Search", command=search_books).pack(side=tk.LEFT, padx=5)
+tk.Button(search_bar, text="Search",
+         command=search_books).pack(side=tk.LEFT, padx=5)
 
 search_cols = ('Title', 'Author', 'Year', 'Available Copies')
-search_tree = ttk.Treeview(search_frame, columns=search_cols, show='headings', height=8)
+search_tree = ttk.Treeview(search_frame, columns=search_cols,
+                          show='headings', height=8)
 search_widths = [280, 200, 80, 110]
 for i, col in enumerate(search_cols):
     search_tree.heading(col, text=col)
     search_tree.column(col, width=search_widths[i])
 search_tree.pack(pady=10, padx=10, fill=tk.BOTH, expand=True)
 
-tk.Label(search_frame, text="Contact admin to issue books", font=("Arial", 10), bg="white", fg="#666").pack(pady=10)
+tk.Label(search_frame, text="Contact admin to issue books",
+        font=("Arial", 10), bg="white", fg="#666").pack(pady=10)
 
 refresh_borrowed()
 search_books()
