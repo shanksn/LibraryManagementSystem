@@ -17,20 +17,28 @@ A complete Python-based Library Management System with MySQL database integratio
 ### 👨‍💼 Admin Features
 - **Add Members**: Create new library member accounts with full details (prevents duplicate usernames, single window at a time)
 - **Add Books**: Add books with ISBN, multiple copies support (1-5 copies, prevents duplicate titles by same author, single window at a time)
+- **View Users**: See all registered users (admins and members) with contact details and registration dates
 - **Search Catalog**:
   - View all books with filtering (Active/Deleted/All)
   - See total copies and available copies
   - Track borrowers with issue and due dates
   - Double-click to view all copies of a book
   - Single window at a time (brings existing window to front)
-- **Issue Books**: Assign books to members with automatic due date calculation (15 days) - Max 3 books per member
+- **Issue Books**:
+  - Assign books to members with automatic due date calculation (15 days)
+  - **Overdue Prevention**: Cannot issue books to members with overdue items (priority check)
+  - Max 3 books per member borrowing limit
 - **Return Books**: Process book returns from the detailed copy view
-- **Delete Books**: Soft delete books (can be restored manually)
-- **Transaction Audit Trail**: All actions tracked with admin user ID
+- **Delete Books**: Soft delete books (prevents deletion of currently issued books)
+- **Defaulters List**: View all members with overdue books, including days overdue
 - **Weekly Reports**: View transaction history for last 7 days (single window at a time)
+- **Transaction Audit Trail**: All actions tracked with admin user ID
+- **UI Icons**: Decorative 50x50 icons for all dashboard buttons and 40x40 portal icons
 
 ### 👤 Member Features
 - **My Borrowed Books**: View all currently issued books with due dates
+  - **Overdue Highlighting**: Books past due date highlighted in red
+  - Warning message displayed if any books are overdue
 - **Search Books**: Browse available books in the library with available copies count
 - **Date Tracking**: See issue date and due date in dd/mm/yyyy format
 - **Clean Interface**: Search results show only book title, author, year, and available copies
@@ -75,9 +83,9 @@ python3 setup_database_final.py
 ```
 Enter your MySQL credentials when prompted. This creates:
 - **4 tables**: users, members, books, transactions
-- **5 sample users** (2 admins, 3 members)
-- **125+ Indian books** across 18 genres
-- Sample issued books for testing
+- **3 sample users** (1 admin, 2 members)
+- **25 sample Indian books** across multiple genres
+- Sample issued books for testing (including one overdue)
 
 ### 4. Run the Application
 ```bash
@@ -88,18 +96,16 @@ python3 login.py
 
 ## 🔑 Login Credentials
 
-### Admin Accounts
+### Admin Account
 | Username | Password | Description |
 |----------|----------|-------------|
 | `admin` | `admin123` | Primary administrator |
-| `librarian` | `lib123` | Secondary administrator |
 
 ### Member Accounts
 | Username | Password | Status |
 |----------|----------|--------|
-| `priya` | `priya123` | Has 1 book issued |
-| `rahul` | `rahul123` | Has 1 book issued |
-| `anjali` | `anjali123` | No books issued |
+| `priya` | `priya123` | Has 1 book issued (current) |
+| `rahul` | `rahul123` | Has 1 book issued (overdue) |
 
 ---
 
@@ -108,20 +114,29 @@ python3 login.py
 ```
 library_app/
 ├── login.py                    # Login screen with authentication
-├── admin.py                    # Admin dashboard
-├── member.py                   # Member dashboard
+├── admin.py                    # Admin dashboard with 6 features
+├── member.py                   # Member dashboard with overdue highlighting
 ├── add_member.py               # Add new member form
 ├── add_book.py                 # Add new book form
-├── setup_database_final.py     # Database setup with 125+ books
+├── setup_database_final.py     # Database setup with 25 sample books
+├── config.py                   # Database config (gitignored)
 ├── config_template.py          # Database config template
-├── library.jpeg                # Background image for login
 ├── requirements.txt            # Python dependencies
 ├── README.md                   # This file
-└── docs/                       # Documentation and utilities
-    ├── USER_MANUAL.md          # Comprehensive user manual
-    ├── BUILD_INSTRUCTIONS.md   # Build instructions
-    ├── INSTRUCTIONS.md         # Setup instructions
-    ├── build_windows_exe.py    # Windows executable builder
+├── images/                     # UI icons and images
+│   ├── library.jpeg            # Login background
+│   ├── admin_portal.png        # Admin icon (40x40)
+│   ├── member_portal.png       # Member icon (40x40)
+│   ├── add_member.png          # Add Member button icon (50x50)
+│   ├── add_books.png           # Add Book button icon (50x50)
+│   ├── view_users.png          # View Users button icon (50x50)
+│   ├── search_catalog.png      # Search Catalog icon (50x50)
+│   ├── weekly_report.png       # Weekly Reports icon (50x50)
+│   └── defaulters_list.png     # Defaulters List icon (50x50)
+└── docs/                       # Documentation
+    ├── User_manual_final.md    # Complete CBSE Class XII user manual
+    ├── USER_MANUAL.md          # Detailed user manual
+    ├── DATABASE_RELATIONSHIPS.md # ERD and database design
     └── ... (other documentation)
 ```
 
@@ -186,23 +201,20 @@ Audit trail of all book operations.
 
 ---
 
-## 📖 Book Collection
+## 📖 Sample Book Collection
 
-The system includes **125+ carefully curated Indian books** across multiple genres:
+The system includes **25 carefully curated Indian books** across multiple genres:
 
 - **Classic Literature**: Arundhati Roy, Salman Rushdie, R.K. Narayan
-- **Chetan Bhagat Series**: 2 States, Five Point Someone, Half Girlfriend, etc.
-- **Mythology**: Complete Amish Tripathi collection (Shiva & Ram series)
+- **Chetan Bhagat Series**: 2 States, Five Point Someone
+- **Mythology**: Amish Tripathi's Shiva Trilogy
 - **Biographies**: Wings of Fire, My Experiments with Truth, Discovery of India
-- **Contemporary Fiction**: Ruskin Bond, Jhumpa Lahiri, Rohinton Mistry
-- **Mystery & Thriller**: Ashwin Sanghi novels
-- **Women Writers**: Manju Kapur, Anita Nair, Anuja Chauhan
-- **Social Commentary**: Shashi Tharoor, Bipan Chandra
-- **Poetry**: Rabindranath Tagore, Kamala Das
-- **Business**: Nandan Nilekani, Gurcharan Das
-- **And many more...**
+- **Contemporary Fiction**: Ruskin Bond, Jhumpa Lahiri
+- **Mystery & Thriller**: Ashwin Sanghi's The Krishna Key
+- **Spirituality**: Bhagavad Gita, Gitanjali
+- **Travel**: Shantaram by Gregory David Roberts
 
-All books include authentic ISBN numbers and publication years.
+All books include authentic ISBN numbers and publication years. Multiple copies of popular books are available for testing copy management features.
 
 ---
 
@@ -226,9 +238,18 @@ All books include authentic ISBN numbers and publication years.
 
 ✅ **Borrowing Limit**: Members can borrow maximum 3 books at a time
 
+✅ **Overdue Prevention** (Priority Check):
+- Members with overdue books CANNOT borrow new books
+- System checks for overdue books BEFORE checking borrowing limit
+- Clear error message shows which books are overdue and days count
+
 ✅ **Date Format**: dd/mm/yyyy (Indian standard)
 
 ✅ **Due Date**: Automatically calculated as 15 days from issue date
+
+✅ **Overdue Highlighting**:
+- Member portal highlights overdue books in red (#ffcccc background)
+- Warning message displayed when overdue books exist
 
 ✅ **Soft Delete**:
 - Deleted books remain in database with record_status="Deleted"
@@ -367,7 +388,17 @@ This project demonstrates key concepts from CBSE Class XII Computer Science curr
 
 ---
 
-## 🔄 Future Enhancements
+## 🔄 Recent Updates (Version 3.0)
+
+### New Features Added:
+✨ **View Users** - See all registered users with details
+✨ **Defaulters List** - Track overdue books and members
+✨ **Overdue Prevention** - Cannot issue to members with overdue books
+✨ **Overdue Highlighting** - Red background for overdue books in member portal
+✨ **UI Icons** - Professional icons for all buttons and portals
+✨ **Code Optimization** - Formatted for CBSE documentation (shorter comments, better wrapping)
+
+### Future Enhancements:
 
 Potential features for advanced students:
 - Fine calculation for overdue books
@@ -408,7 +439,7 @@ For issues or questions:
 ---
 
 **Version**: 3.0
-**Last Updated**: November 2025
+**Last Updated**: January 2026
 
 ---
 
